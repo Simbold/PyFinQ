@@ -4,7 +4,7 @@ from tree_methods import generate_tree_state, generate_full_tree, european_state
     american_put_condition
 
 
-def binomial_tree_bs(spot, strike, r, sigma, mt, m, option_type="call", american_exercise=False):
+def binomial_tree_bs(spot, strike, r, sigma, mt, m=5000, option_type="call", american_exercise=False):
     # spot: underlying spot price
     # strike: strike price
     # r: rik free interest rate
@@ -77,7 +77,7 @@ def binomial_tree_bs_numba(spot, strike, r, sigma, mt, m, option_type, american)
 
 
 @numba.jit(nopython=True, parallel=True)
-def binomial_tree_bs_numba2(spot, strike, r, sigma, mt, m, option_type="call", american_exercise=False):
+def binomial_tree_bs_numba2(spot, strike, r, sigma, mt, m, option_type, american_exercise):
     # spot: underlying spot price
     # strike: strike price
     # r: rik free interest rate
