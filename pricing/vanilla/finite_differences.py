@@ -253,13 +253,6 @@ def fidi_bs_eu_numba2(strike, r, sigma, mt, a, b, m, nu_max, scheme):
     return [v0, spot]
 
 
-@numba.vectorize
-def g(ttilde, xtilde, q):
-    # exercise function for the put (for american fidi scheme)
-    s = np.exp((q + 1) ** 2 * ttilde / 4) * np.maximum(np.exp(xtilde * (q - 1) / 2) - np.exp(xtilde * (q + 1) / 2), 0)
-    return s
-
-
 @numba.jit(nopython=True)
 def fidi_bs_american_numba(strike, r, sigma, mt, a, b, m, nu_max):
     # strike: float or integer the strike price
@@ -277,36 +270,37 @@ def fidi_bs_american_numba(strike, r, sigma, mt, a, b, m, nu_max):
     dx = (b - a) / m
     dt = sigma ** 2 * mt / (2 * nu_max)
 
-    xtilde = a+np.arange(0, m+1)*dx
+    xtilde = a + np.arange(0, m + 1) * dx
 
-    ttilde = np.arange(0, nu_max+1)*dt
+    ttilde = np.arange(0, nu_max + 1) * dt
 
     lamb = dt / dx ** 2
     q = 2 * r / sigma ** 2
 
-    # initial boundary condition for nu
-    w = g(ttilde[0], xtilde, q)
+    # discretized exercise function for the put (for american Fidi scheme)
+    w = np.maximum(np.exp(xtilde * (q - 1) / 2) - np.exp(xtilde * (q + 1) / 2), 0)
+
     # the tridiagonal Matrix with alpha on diagonal and beta to the right and gamma to the left
     alpha = np.ones(m - 1, dtype=np.float64) * (1 + lamb)
     beta = np.ones(m - 2, dtype=np.float64) * (-0.5 * lamb)
     n = len(alpha)
 
-    bs = np.zeros(m - 1, dtype=np.float64)
+    bs = np.zeros(m - 1, np.float64)
     for i in range(0, nu_max):
 
         if i == round(nu_max * 0.5):
             print("Fidi progress: 50%")
 
-        gnui = g(ttilde[i], xtilde, q)
+        gnui = np.exp((q + 1) ** 2 * ttilde[i] / 4) * np.maximum(
+            np.exp(xtilde * (q - 1) / 2) - np.exp(xtilde * (q + 1) / 2), 0)
 
         w[-1] = gnui[-1]
         w[0] = gnui[0]
-        # compute b for the linear complementarity problem
         bs[1:-1] = w[2:-2] + 0.5 * lamb * (w[1:-3] - 2 * w[2:-2] + w[3:-1])
-        bs[0] = w[1] + 0.5 * lamb * (w[2] - 2 * w[1] + gnui[0] + g(ttilde[i + 1], a, q))
-        bs[-1] = w[-2] + 0.5 * lamb * (gnui[-1] - 2 * w[-2] + w[-3] + g(ttilde[i + 1], b, q))
 
-        # solving the linear complementarity problem using the brennan schwartz algorithm
+        bs[0] = w[1] + 0.5 * lamb * (w[2] - 2 * w[1] + gnui[0] + np.exp((q + 1) ** 2 * ttilde[i+1] / 4) * np.maximum(np.exp(a * (q - 1) / 2) - np.exp(a * (q + 1) / 2), 0))
+        bs[-1] = w[-2] + 0.5 * lamb * (gnui[-1] - 2 * w[-2] + w[-3] + np.exp((q + 1) ** 2 * ttilde[i+1] / 4) * np.maximum(np.exp(b * (q - 1) / 2) - np.exp(b * (q + 1) / 2), 0))
+
         g_nui = gnui[1:-1]
 
         alpha_hat = np.zeros(n, dtype=np.float64)
@@ -326,12 +320,10 @@ def fidi_bs_american_numba(strike, r, sigma, mt, a, b, m, nu_max):
 
         w[1:-1] = xinv
 
-    # transform heat equation back to the original problem
     spot = np.zeros(m + 1, dtype=np.float64)
     v0 = np.zeros(m + 1, dtype=np.float64)
     for i in numba.prange(0, m + 1):
         x = a + i * dx
         spot[i] = strike * np.exp(x)
         v0[i] = strike * w[i] * np.exp(-(q - 1) * x / 2 - sigma ** 2 * mt / 2 * ((q - 1) ** 2 / 4 + q))
-
     return [v0, spot]
