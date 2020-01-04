@@ -8,3 +8,5 @@ Basic derivative pricing in Python
     - Binomial tree model of Cox Ross and Rubinstein (American/European exercise style)
     - Finite-differences techniques for European exercise style in the Black-Scholes model (Explicit, Implicit and Crank-Nicolson) 
     - Finite-differences scheme for American exercise style in the Black-Scholes model (Crank-Nicolson scheme using the Brennan-Schwartz algorithm)
+    - Black-Scholes explicit formula (for European put/call)
+    - European Call/Put in the Heston model via the Laplace transform approach

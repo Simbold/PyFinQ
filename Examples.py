@@ -2,10 +2,12 @@
 import numpy as np
 from pricing.vanilla.binomial_tree import binomial_tree_bs
 from pricing.vanilla.finite_differences import fidi_bs_eu, fidi_bs_american
+from pricing.vanilla.integration import closed_form_bs_eu, integrate_heston_eu
 
 ## binomial tree
 
 # spot price
+
 spot = 32
 # risk free interest rate
 r = 0.02
@@ -79,3 +81,32 @@ nu_max = 10000
 spot = [26, 28, 30, 32, 34, 36, 38]
 fidi_result = np.interp(spot, s0_fidi, v0_fidi)  # find the price for different spots via linear interpolation
 print(fidi_result)
+
+## black scholes explicit formula
+
+spot = 110
+strike = 100
+r = 0.05
+sigma = 0.2
+mt = 1
+option_type = "put"
+
+result_bs = closed_form_bs_eu(spot, strike, r, sigma, mt, option_type, t=0)
+print(result_bs)
+
+## heston call/put via laplace transform
+
+spot = 110
+strike = 100
+r = 0.05
+mt = 1
+# heston volatility dynamics parameters
+sigma_tilde = 0.2
+nu0 = 0.3**2
+kappa = 0.3**2
+lamb = 2.5
+
+option_type = "put"
+
+[v0_heston, abserr] = integrate_heston_eu(spot, strike, r, sigma_tilde, mt, nu0, kappa, lamb, option_type, t=0)
+print(v0_heston)
