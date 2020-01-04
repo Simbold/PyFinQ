@@ -71,9 +71,9 @@ mt = 1.4
 a = -0.5
 b = 0.5
 # number of steps in space, must be an integer
-m = 100
+m = 1000
 # number of steps in time
-nu_max = 2000
+nu_max = 20000
 
 [v0_fidi, s0_fidi] = fidi_bs_american(strike, r, sigma, mt, a, b, m, nu_max)
 
