@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def black_scholes_characteristic_function(u, x, r, sigma, mt):
-    y = np.exp(1j * u * (np.log(x) + r * mt) - (1j * u + u ** 2) * sigma ** 2 / 2 * mt)
+def black_scholes_characteristic_function(u, x, r, sigma, mt, t):
+    y = np.exp(1j * u * (x + r * (mt-t)) - (1j * u + u ** 2) * sigma ** 2 / 2 * (mt-t))
     return y
 
 
