@@ -11,5 +11,5 @@ Basic derivative pricing in Python
     - Explicit Black-Scholes formula (European call/put)
     - Heston model (European call/put) via the Laplace transform approach
     - Heston and Black-Scholes model (European call/put) via the Fast Fourier transform
-    - European put/call option via Monte Carlo simulation (also importance sampling, and/or antithetic variables)
+    - European put/call option via Monte Carlo simulation (also importance sampling, and/or use of antithetic variables)
     - American put/call option via Monte Carlo simulation (using the Longstaff-Schwartz algorithm)
